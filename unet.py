@@ -75,6 +75,7 @@ class UNet(nn.Module):
             raise ValueError("The number of features should be positive")
 
         super(UNet, self).__init__()
+        self.num_features = len(features)
         self.ups = nn.ModuleList()
         self.downs = nn.ModuleList()
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -105,6 +106,9 @@ class UNet(nn.Module):
         torch.Tensor
             Output tensor after applying the UNet model
         """
+
+        if x.shape[-1] < 2**(self.num_features+1) or x.shape[-2] < 2**(self.num_features+1):
+            raise ValueError(f"The input tensor sizes must be at least 2^(len(features)+1) = {2**(self.num_features+1)}")
 
         skip_connections = []
         for down in self.downs:

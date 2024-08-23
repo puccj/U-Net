@@ -47,13 +47,23 @@ def test_double_convolution_length(input, output):
 
 def test_double_convolution_negative_in_channels():
     # Check if a RuntimeError is raised when in_channels is negative
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         _ = DoubleConvolution(in_channels=-3, out_channels=64)
 
 def test_double_convolution_negative_out_channels():
     # Check if a RuntimeError is raised when out_channels is negative
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         _ = DoubleConvolution(in_channels=3, out_channels=-64)
+
+def test_double_convolution_zero_in_channels():
+    # Check if a RuntimeError is raised when in_channels is negative
+    with pytest.raises(ValueError):
+        _ = DoubleConvolution(in_channels=0, out_channels=64)
+
+def test_double_convolution_zero_out_channels():
+    # Check if a RuntimeError is raised when in_channels is negative
+    with pytest.raises(ValueError):
+        _ = DoubleConvolution(in_channels=3, out_channels=0)
 
 
 # Test DoubleConvolution forward method

@@ -16,7 +16,18 @@ class DoubleConvolution(nn.Module):
             Number of input channels
         out_channels: int
             Number of output channels
+
+        Raises
+        ------
+        ValueError
+            If the number of input channels is less than 1 or the number of output channels is less than 1
         """
+
+        if in_channels < 1:
+            raise ValueError("The number of input channels should be at least 1")
+        if out_channels < 1:
+            raise ValueError("The number of output channels should be at least 1")
+        
         super(DoubleConvolution, self).__init__()
         self.double_conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, 1, 1, bias=False),
@@ -57,16 +68,21 @@ class UNet(nn.Module):
     number of classes.
     """
     def __init__(self, in_channel=3, out_channels=1, features=[64, 128, 256, 512]):
-        """Initializes the UNet model
+        """Initialize the UNet model
 
         Parameters
         ----------
         in_channel: int
-            Number of input channels
+            Number of input channels: 1 for grayscale, 3 for RGB)
         out_channels: int
-            Number of output channels
+            Number of output channels: 1 for binary segmentation, >1 for multi-class segmentation
         features: list
-            List of features in the encoder. The length of the list determines the iteration in the encoder and decoder
+            List of features in the encoder. The length of the list determines the depth of the UNet model.
+
+        Raises
+        ------
+        ValueError
+            If the number of features is less than 2 or if any feature is less than 0
         """
 
         if len(features) < 2:
@@ -100,6 +116,11 @@ class UNet(nn.Module):
         ----------
         x: torch.Tensor
             Input tensor to be processed by the UNet model
+
+        Raises
+        ------
+        ValueError
+            If the input tensor sizes is less then 2^(len(features)+1), since the tensor sizes are halved in each downsampling step
 
         Returns
         -------

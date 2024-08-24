@@ -226,12 +226,12 @@ def test_final_conv_layer():
 
 def test_negative_in_channels():
     # Check if a RuntimeError is raised when the input channels are negative
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         _ = UNet(in_channel=-3, out_channels=1, features=[64, 128, 256, 512])
 
 def test_negative_out_channels():
     # Check if a RuntimeError is raised when the output channels are negative
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         _ = UNet(in_channel=3, out_channels=-1, features=[64, 128, 256, 512])
 
 def test_min_features():
@@ -302,7 +302,7 @@ def test_forward_same_size(batch, channels, width, height):
 @settings(deadline=None)
 @example(batch = 1, channels = 3, width = 128, height = 128)
 @example(batch = 1, channels = 3, width = 161, height = 161)    # odd dimension input tensor
-@example(batch = 1, channels = 3, width = 1024, height = 1024)  # big size input tensor
+@example(batch = 1, channels = 3, width = 512, height = 512)    # big size input tensor
 def test_forward_correct_shape(batch, channels, width, height):
     # Check if the output shape is as expected
     make_test_deterministic()

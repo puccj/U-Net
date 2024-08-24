@@ -83,12 +83,18 @@ class UNet(nn.Module):
         ------
         ValueError
             If the number of features is less than 2 or if any feature is less than 0
+            If the number of input channels is less than 1
+            If the number of output channels is less than 1
         """
 
         if len(features) < 2:
             raise ValueError("The number of features should be at least 2")
         if any(f < 0 for f in features):
             raise ValueError("The number of features should be positive")
+        if in_channel < 1:
+            raise ValueError("The number of input channels should be at least 1")
+        if out_channels < 1:
+            raise ValueError("The number of output channels should be at least 1")
 
         super(UNet, self).__init__()
         self.num_features = len(features)

@@ -191,7 +191,7 @@ def test_double_convolution_small_input():
 @example(features=[64, 128, 256, 512])
 def test_downs_length(features):
     # Check if the length of self.downs matches the length of the features list
-    model = UNet(in_channel=3, out_channels=1, features=features)
+    model = UNet(in_channels=3, out_channels=1, features=features)
     assert len(model.downs) == len(features)
 
 @given(features = st.lists(st.integers(min_value=1, max_value=512), min_size=2, max_size=10))
@@ -200,26 +200,26 @@ def test_downs_length(features):
 def test_ups_length(features):
     # Check if the length of self.ups is twice the length of the features list
     # because each up layer has a ConvTranspose2d followed by a DoubleConvolution
-    model = UNet(in_channel=3, out_channels=1, features=features)
+    model = UNet(in_channels=3, out_channels=1, features=features)
     assert len(model.ups) == 2*len(features)
 
 def test_pooling_layer():
     # Check if pooling layer is correctly initialized
-    model = UNet(in_channel=3, out_channels=1, features=[64, 128, 256, 512])
+    model = UNet(in_channels=3, out_channels=1, features=[64, 128, 256, 512])
     assert isinstance(model.pool, nn.MaxPool2d)
     assert model.pool.kernel_size == 2
     assert model.pool.stride == 2
 
 def test_bottleneck_layer():
     # Check if the bottleneck layer is correctly initialized
-    model = UNet(in_channel=3, out_channels=1, features=[64, 128, 256, 512])
+    model = UNet(in_channels=3, out_channels=1, features=[64, 128, 256, 512])
     assert isinstance(model.bottleneck, DoubleConvolution)
     assert model.bottleneck.double_conv[0].in_channels == 512
     assert model.bottleneck.double_conv[0].out_channels == 1024
 
 def test_final_conv_layer():
     # Check if the final convolution layer is correctly initialized
-    model = UNet(in_channel=3, out_channels=1, features=[64, 128, 256, 512])
+    model = UNet(in_channels=3, out_channels=1, features=[64, 128, 256, 512])
     assert isinstance(model.final_conv, nn.Conv2d)
     assert model.final_conv.in_channels == 64
     assert model.final_conv.out_channels == 1
@@ -227,22 +227,22 @@ def test_final_conv_layer():
 def test_negative_in_channels():
     # Check if a RuntimeError is raised when the input channels are negative
     with pytest.raises(ValueError):
-        _ = UNet(in_channel=-3, out_channels=1, features=[64, 128, 256, 512])
+        _ = UNet(in_channels=-3, out_channels=1, features=[64, 128, 256, 512])
 
 def test_negative_out_channels():
     # Check if a RuntimeError is raised when the output channels are negative
     with pytest.raises(ValueError):
-        _ = UNet(in_channel=3, out_channels=-1, features=[64, 128, 256, 512])
+        _ = UNet(in_channels=3, out_channels=-1, features=[64, 128, 256, 512])
 
 def test_min_features():
     # Check if a ValueError is raised when the number of features is less than 2
     with pytest.raises(ValueError):
-        _ = UNet(in_channel=3, out_channels=1, features=[64])
+        _ = UNet(in_channels=3, out_channels=1, features=[64])
 
 def test_negative_features():
     # Check if a ValueError is raised when the features are negative
     with pytest.raises(ValueError):
-        _ = UNet(in_channel=3, out_channels=1, features=[-64, 128, 256, 512])
+        _ = UNet(in_channels=3, out_channels=1, features=[-64, 128, 256, 512])
 
 
 # Test UNet forward method
@@ -276,7 +276,7 @@ def test_forward_called_with_correct_input():
 def test_forward_correct_channel(batch, channels, width, height):
     # Check if the output has the correct number of channels
     make_test_deterministic()
-    model = UNet(in_channel=channels)
+    model = UNet(in_channels=channels)
     x = torch.randn(batch, channels, width, height)
     output = model(x)
     assert output.shape[1] == 1
@@ -290,7 +290,7 @@ def test_forward_correct_channel(batch, channels, width, height):
 def test_forward_same_size(batch, channels, width, height):
     # Check if the output size matches the input size
     make_test_deterministic()
-    model = UNet(in_channel=channels)
+    model = UNet(in_channels=channels)
     x = torch.randn(batch, channels, width, height)
     output = model(x)
     assert output.shape[2:] == x.shape[2:]
@@ -306,7 +306,7 @@ def test_forward_same_size(batch, channels, width, height):
 def test_forward_correct_shape(batch, channels, width, height):
     # Check if the output shape is as expected
     make_test_deterministic()
-    model = UNet(in_channel=channels)
+    model = UNet(in_channels=channels)
     x = torch.randn(batch, channels, width, height)
     output = model(x)
     assert output.shape == (batch, 1, width, height)
@@ -336,7 +336,7 @@ def test_forward_wrong_channel_input():
 
 def test_forward_wrong_channel_input2():
     # Check if a RuntimeError is raised when the number of channel of input (3) is different from the model (1)
-    model = UNet(in_channel=1, out_channels=1, features=[64, 128, 256, 512])
+    model = UNet(in_channels=1, out_channels=1, features=[64, 128, 256, 512])
     x = torch.randn(1, 3, 128, 128)
     with pytest.raises(RuntimeError):
         model(x)

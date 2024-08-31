@@ -67,12 +67,12 @@ class UNet(nn.Module):
     convolutional layers. The final layer of the UNet model is a 1x1 convolutional layer that maps each pixel to the desired
     number of classes.
     """
-    def __init__(self, in_channel=3, out_channels=1, features=[64, 128, 256, 512]):
+    def __init__(self, in_channels=3, out_channels=1, features=[64, 128, 256, 512]):
         """Initialize the UNet model
 
         Parameters
         ----------
-        in_channel: int
+        in_channels: int
             Number of input channels: 1 for grayscale, 3 for RGB)
         out_channels: int
             Number of output channels: 1 for binary segmentation, >1 for multi-class segmentation
@@ -91,7 +91,7 @@ class UNet(nn.Module):
             raise ValueError("The number of features should be at least 2")
         if any(f < 0 for f in features):
             raise ValueError("The number of features should be positive")
-        if in_channel < 1:
+        if in_channels < 1:
             raise ValueError("The number of input channels should be at least 1")
         if out_channels < 1:
             raise ValueError("The number of output channels should be at least 1")
@@ -104,8 +104,8 @@ class UNet(nn.Module):
         
         # Down part of UNet
         for feature in features:
-            self.downs.append(DoubleConvolution(in_channel, feature))
-            in_channel = feature
+            self.downs.append(DoubleConvolution(in_channels, feature))
+            in_channels = feature
         
         # Up part of UNet
         for feature in reversed(features):

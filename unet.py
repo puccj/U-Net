@@ -121,7 +121,7 @@ class UNet(nn.Module):
         Parameters
         ----------
         x: torch.Tensor
-            Input tensor to be processed by the UNet model
+            Input tensor to be processed by the UNet model of shape (batch_size, in_channels, height, width)
 
         Raises
         ------

@@ -22,6 +22,9 @@ class SegmentationDataset(Dataset):
         self.transform = transform
         self.images = os.listdir(images_dir)
         self.masks = os.listdir(masks_dir)
+
+    def __len__(self):
+        return len(self.images)
     
     def __getitem__(self, idx):
         image_path = os.path.join(self.image_dir, self.images[idx])

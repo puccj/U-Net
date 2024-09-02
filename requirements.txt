@@ -1,5 +1,7 @@
 torch
 torchvision
+tqdm
+albumentations
 
 pytest
 hypothesis

@@ -1,7 +1,8 @@
 import torch
 import torchvision
 import torch.nn as nn
-from torchvision.transforms import v2
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 from torch import optim
 from torch.utils.data import DataLoader
 
@@ -14,12 +15,12 @@ from dataset import SegmentationDataset
 # Hyperparameters
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 4
+BATCH_SIZE = 16
 NUM_EPOCHS = 3
 NUM_WORKERS = 2
 NUM_CLASSES = 1
-IMAGE_HEIGHT = 32  # 160
-IMAGE_WIDTH = 32   # 240
+IMAGE_HEIGHT = 128  # 160
+IMAGE_WIDTH = 128   # 240
 PIN_MEMORY = True
 LOAD_MODEL = False
 TRAIN_IMG_DIR = "data/train_images/"
@@ -64,7 +65,6 @@ def check_binary_accuracy(loader, model, device='cuda'):
         for x, y in loader:
             x = x.to(device)
             y = y.to(device).unsqueeze(1)
-            x = x.float().permute(0, 3, 1, 2)   # permute from (B, H, W, C) to (B, C, H, W)
             preds = torch.sigmoid(model(x))
             preds = (preds > 0.5).float()   # binary thresholding (change for multi-class segmentation)
             num_correct += (preds == y).sum()
@@ -105,7 +105,6 @@ def save_predictions_as_imgs(loader, model, dir="saved_images/", device="cuda"):
     for idx, (x, y) in enumerate(loader):
         x = x.to(device)
         y = y.to(device).unsqueeze(1)
-        x = x.float().permute(0, 3, 1, 2)
         with torch.no_grad():
             preds = torch.sigmoid(model(x))
             preds = (preds > 0.5).float()   # binary thresholding (change for multi-class segmentation)
@@ -146,7 +145,6 @@ def train(loader, model, optimizer, loss_fn, scaler, device="default"):
 
         # forward
         with torch.amp.autocast(device):
-            data = data.float().permute(0, 3, 1, 2)   # permute from (B, H, W, C) to (B, C, H, W)
             predictions = model(data)
             loss = loss_fn(predictions, targets)
 
@@ -172,24 +170,26 @@ def main():
     
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    train_transforms = v2.Compose([
-        v2.RandomHorizontalFlip(p=0.5), # 50% chance of flipping the image
-        v2.RandomRotation(5),           # rotate +/- 5 degrees
-        v2.RandomCrop((IMAGE_HEIGHT, IMAGE_WIDTH), padding=int(IMAGE_HEIGHT/2)),  # crop the image
-        v2.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
-        v2.RandomPerspective(distortion_scale=0.2, p=0.5),
-        v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])   # equivalent to deprecated v2.ToTensor()
+    train_transform = A.Compose([
+        A.HorizontalFlip(p=0.5),    # 50% chance of flipping the image
+        A.Rotate(5),                # rotate +/- 5 degrees
+        A.RandomCrop(IMAGE_HEIGHT, IMAGE_WIDTH), # crop the image
+        A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),     # change to real values
+        ToTensorV2()
     ])
 
-    val_transforms = v2.Compose([
-        v2.Resize((IMAGE_HEIGHT, IMAGE_WIDTH)),
-        v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])
+    val_transform = A.Compose([
+        A.RandomCrop(IMAGE_HEIGHT, IMAGE_WIDTH),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),     # change to real values
+        # v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])
+        ToTensorV2()
     ])
 
-    train_dataset = SegmentationDataset(TRAIN_IMG_DIR, TRAIN_MASK_DIR) #, transform=train_transforms)
+    train_dataset = SegmentationDataset(TRAIN_IMG_DIR, TRAIN_MASK_DIR, transform=train_transform)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=PIN_MEMORY, shuffle=True)
 
-    val_dataset = SegmentationDataset(VAL_IMG_DIR, VAL_MASK_DIR)
+    val_dataset = SegmentationDataset(VAL_IMG_DIR, VAL_MASK_DIR, transform=val_transform)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=PIN_MEMORY, shuffle=False)
     
     scaler = torch.amp.GradScaler(DEVICE)

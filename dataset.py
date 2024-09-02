@@ -34,7 +34,7 @@ class SegmentationDataset(Dataset):
         mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)   # so [0-255]
         mask[mask == 255.0] = 1.0   # Convert 255 to 1, indicating the probability of the pixel being the object
 
-        if self.transform is not None:
+        if self.transform:
             augmentations = self.transform(image=image, mask=mask)
             image = augmentations["image"]
             mask = augmentations["mask"]

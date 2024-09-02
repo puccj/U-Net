@@ -15,13 +15,13 @@ from dataset import SegmentationDataset
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = 4
-NUM_EPOCHS = 0
+NUM_EPOCHS = 3
 NUM_WORKERS = 2
 NUM_CLASSES = 1
 IMAGE_HEIGHT = 32  # 160
 IMAGE_WIDTH = 32   # 240
 PIN_MEMORY = True
-LOAD_MODEL = True
+LOAD_MODEL = False
 TRAIN_IMG_DIR = "data/train_images/"
 TRAIN_MASK_DIR = "data/train_masks/"
 VAL_IMG_DIR = "data/val_images/"

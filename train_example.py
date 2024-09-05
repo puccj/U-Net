@@ -16,11 +16,11 @@ from dataset import SegmentationDataset
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = 16
-NUM_EPOCHS = 3
-NUM_WORKERS = 2
+NUM_EPOCHS = 100
+NUM_WORKERS = 4
 NUM_CLASSES = 1
-IMAGE_HEIGHT = 128  # 160
-IMAGE_WIDTH = 128   # 240
+IMAGE_HEIGHT = 256
+IMAGE_WIDTH = 256
 PIN_MEMORY = True
 LOAD_MODEL = False
 TRAIN_IMG_DIR = "data/train_images/"
@@ -64,6 +64,7 @@ def check_binary_accuracy(loader, model, device='cuda'):
     with torch.no_grad():
         for x, y in loader:
             x = x.to(device)
+            x = x.float()
             y = y.to(device).unsqueeze(1)
             preds = torch.sigmoid(model(x))
             preds = (preds > 0.5).float()   # binary thresholding (change for multi-class segmentation)
@@ -109,6 +110,9 @@ def save_predictions_as_imgs(loader, model, dir="saved_images/", device="cuda"):
             preds = torch.sigmoid(model(x))
             preds = (preds > 0.5).float()   # binary thresholding (change for multi-class segmentation)
         
+        x = x.float()
+        x = (x - x.min()) / (x.max() - x.min())
+        torchvision.utils.save_image(x, f"{dir}/img_{idx}.png")
         torchvision.utils.save_image(preds, f"{dir}/pred_{idx}.png")
         torchvision.utils.save_image(y, f"{dir}/mask_{idx}.png")
     
@@ -145,6 +149,7 @@ def train(loader, model, optimizer, loss_fn, scaler, device="default"):
 
         # forward
         with torch.amp.autocast(device):
+            data = data.float()
             predictions = model(data)
             loss = loss_fn(predictions, targets)
 
@@ -173,16 +178,16 @@ def main():
     train_transform = A.Compose([
         A.HorizontalFlip(p=0.5),    # 50% chance of flipping the image
         A.Rotate(5),                # rotate +/- 5 degrees
-        A.RandomCrop(IMAGE_HEIGHT, IMAGE_WIDTH), # crop the image
-        A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
-        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),     # change to real values
+        A.RandomResizedCrop(width=IMAGE_WIDTH, height=IMAGE_HEIGHT, scale=(0.1, 1.0)),  # crop the image
+        # A.RandomCrop(IMAGE_HEIGHT, IMAGE_WIDTH), # crop the image
+        # A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
         ToTensorV2()
     ])
 
     val_transform = A.Compose([
-        A.RandomCrop(IMAGE_HEIGHT, IMAGE_WIDTH),
-        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),     # change to real values
-        # v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])
+        # A.CenterCrop(IMAGE_HEIGHT, IMAGE_WIDTH),
+        A.RandomResizedCrop(width=IMAGE_WIDTH, height=IMAGE_HEIGHT, scale=(0.1, 1.0)),  # crop the image
+        # A.RandomCrop(IMAGE_HEIGHT, IMAGE_WIDTH),
         ToTensorV2()
     ])
 

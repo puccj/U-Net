@@ -245,6 +245,19 @@ def test_negative_features():
         _ = UNet(in_channels=3, out_channels=1, features=[-64, 128, 256, 512])
 
 
+# Test UNet is_binary method
+
+def test_is_binary():
+    # Check if the is_binary method returns True when the output channels is 1
+    model = UNet(in_channels=3, out_channels=1, features=[64, 128, 256, 512])
+    assert model.is_binary() == True
+
+def test_is_not_binary():
+    # Check if the is_binary method returns False when the output channels is not 1
+    model = UNet(in_channels=3, out_channels=3, features=[64, 128, 256, 512])
+    assert model.is_binary() == False
+
+
 # Test UNet forward method
 
 def test_forward_called():

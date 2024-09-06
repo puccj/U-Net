@@ -115,6 +115,16 @@ class UNet(nn.Module):
         self.bottleneck = DoubleConvolution(features[-1], features[-1]*2)
         self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=1)
 
+    def is_binary(self):
+        """Returns whether the model output is binary or multi-class
+
+        Returns
+        -------
+        bool
+            True if the model output is binary, False if the model output is multi-class
+        """
+        return self.final_conv.out_channels == 1
+    
     def forward(self, x):
         """Perform the forward propagation
 

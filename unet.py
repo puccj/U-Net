@@ -5,8 +5,19 @@ import torchvision.transforms.functional as TF
 class DoubleConvolution(nn.Module):
     """Applies double convolution to the input
     
-    Double convolution is a sequence of two convolutional layers with batch normalization and ReLU activation function.
+    Double convolution is a sequence of two 3x3 convolutional layers with batch normalization and ReLU activation function.
+    
+    Attributes
+    ----------
+    double_conv: nn.Sequential
+        Sequence of two convolutional layers with batch normalization and ReLU activation function
+
+    Methods
+    -------
+    forward(x)
+        Perform the forward propagation
     """
+
     def __init__(self, in_channels, out_channels):
         """Initializes the DoubleConvolution module
         
@@ -20,7 +31,8 @@ class DoubleConvolution(nn.Module):
         Raises
         ------
         ValueError
-            If the number of input channels is less than 1 or the number of output channels is less than 1
+            If the number of input channels is less than 1 
+            If the number of output channels is less than 1
         """
 
         if in_channels < 1:
@@ -51,6 +63,7 @@ class DoubleConvolution(nn.Module):
         torch.Tensor
             Output tensor after applying the double convolution
         """
+
         return self.double_conv(x)
     
 class UNet(nn.Module):
@@ -66,18 +79,45 @@ class UNet(nn.Module):
     consists of a series of up-convolutions, which increase the spatial resolution of the input, followed by a series of
     convolutional layers. The final layer of the UNet model is a 1x1 convolutional layer that maps each pixel to the desired
     number of classes.
+
+    Attributes
+    ----------
+    num_features: int
+        Number of features in the encoder
+    ups: nn.ModuleList
+        List of up-convolutions in the decoder
+    downs: nn.ModuleList
+        List of double convolutions in the encoder
+    pool: nn.MaxPool2d
+        Max pooling layer
+    bottleneck: DoubleConvolution
+        Bottleneck layer
+    final_conv: nn.Conv2d
+        Final convolutional layer
+
+    Methods
+    -------
+    is_binary()
+        Returns whether the model output is binary or multi-class
+    forward(x)
+        Perform the forward propagation
+
+    References
+    ----------
+    Ronneberger, O., Fischer, P., & Brox, T. (2015). U-Net: Convolutional Networks for Biomedical Image Segmentation. arXiv preprint arXiv:1505.04597.
     """
+
     def __init__(self, in_channels=3, out_channels=1, features=[64, 128, 256, 512]):
         """Initialize the UNet model
 
         Parameters
         ----------
         in_channels: int
-            Number of input channels: 1 for grayscale, 3 for RGB)
+            Number of input channels: 1 for grayscale, 3 for RGB
         out_channels: int
             Number of output channels: 1 for binary segmentation, >1 for multi-class segmentation
         features: list
-            List of features in the encoder. The length of the list determines the depth of the UNet model.
+            List of features in the encoder and decoder. The length of the list determines the depth of the UNet model.
 
         Raises
         ------
@@ -123,6 +163,7 @@ class UNet(nn.Module):
         bool
             True if the model output is binary, False if the model output is multi-class
         """
+
         return self.final_conv.out_channels == 1
     
     def forward(self, x):

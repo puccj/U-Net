@@ -38,6 +38,7 @@ class SegmentationDataset(Dataset):
         transform: Callable
             Tranformation function to be applied to the images and masks in order to perform data augmentation.
         """
+        
         self.image_dir = images_dir
         self.mask_dir = masks_dir
         self.transform = transform

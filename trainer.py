@@ -12,6 +12,7 @@ def ensure_directory_exists(file_path):
     file_path : str
         Path to the file whose directory needs to be created if it doesn't exist.
     """
+
     directory = os.path.dirname(file_path)
     if not directory:
         return
@@ -57,6 +58,7 @@ class Trainer:
     train(num_epochs, save_interval=5, early_stop_patience=None, save_img=True)
         Train the model for a specified number of epochs, saving the best model based on the validation loss.
     """
+
     def __init__(self,
                  model, 
                  train_loader, 
@@ -181,6 +183,7 @@ class Trainer:
         float
             Average Dice score of the model on the validation set.
         """
+
         self.model.eval()
         total_loss = 0
         num_correct = 0
@@ -244,6 +247,7 @@ class Trainer:
         file_path : str, optional
             Path to the checkpoint file. Default is 'checkpoints/last.pth'.
         """
+
         ensure_directory_exists(file_path)
         checkpoint = {
             'model': self.model.state_dict(),
@@ -265,6 +269,7 @@ class Trainer:
         FileNotFoundError
             If the file does not exist or the directory is empty.
         """
+        
         if os.path.isfile(path):
             if not os.path.exists(path):
                 raise FileNotFoundError(f"File {path} does not exist")

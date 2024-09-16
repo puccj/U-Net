@@ -5,6 +5,7 @@ This project consists of an implementation of a U-Net using PyTorch. The resulti
 * [The U-Net architecture](#the-u-net-architecture)
 * [Dependencies](#dependencies)
 * [Installation](#installation)
+* [Documentation](#documentation)
 * [Testing](#testing)
 
 
@@ -55,11 +56,15 @@ Install the requirements:
 pip install -r requirements.txt
 ```
 
+## Documentation
+All the documentation is published at [https://puccj.github.io/U-Net](https://puccj.github.io/U-Net). Also, the file `train_example.py` shows an example of code usage.
+
 ## Testing
 A Testing routine is implemented, by using the `pytest` and `hypothesis` libraries. The test files are inside the `testing` directory. It is possible to run all the tests with:
 ```
 pytest testing/
 ```
+
 
 
 

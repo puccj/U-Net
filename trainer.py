@@ -38,6 +38,16 @@ class Trainer:
         DataLoader for the training dataset.
     val_loader : torch.utils.data.DataLoader
         DataLoader for the validation dataset.
+    model_is_binary : bool
+        True if the model is a binary segmentation model, False if it is a multi-class segmentation model.
+    train_loss : list
+        List of training losses for each epoch.
+    val_loss : list
+        List of validation losses for each epoch.
+    val_accuracy : list
+        List of accuracies on the validation set for each epoch.
+    val_dice : list
+        List of Dice scores on the validation set for each epoch.
     loss_fn : torch.nn.Module
         Loss function to be used for training.
     device : str
@@ -95,6 +105,10 @@ class Trainer:
         self.val_loader = val_loader
         self.model_is_binary = (   (hasattr(self.model, 'is_binary') and self.model.is_binary) 
                                 or (hasattr(self.model, 'final_conv') and self.model.final_conv.out_channels == 1))
+        self.train_loss = []
+        self.val_loss = []
+        self.val_accuracy = []
+        self.val_dice = []
         
         self.loss_fn = loss_fn
         if loss_fn == 'default':
@@ -214,10 +228,10 @@ class Trainer:
                     prediction = torch.softmax(prediction, dim=1)
                     prediction = torch.argmax(prediction, dim=1)
 
-                num_correct += (prediction == y).sum()
+                num_correct += (prediction == y).sum().item()
                 num_pixels += y.numel()
                 
-                total_dice += (2 * (prediction*y).sum()) / ((prediction + y).sum() + 1e-8) # add epsilon to avoid division by zero
+                total_dice += ((2 * (prediction*y).sum()) / ((prediction + y).sum() + 1e-8)).item() # add epsilon to avoid division by zero
 
                 # Update tqdm loop
                 loop.set_postfix(loss=loss.item())
@@ -286,7 +300,7 @@ class Trainer:
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
     def train(self, num_epochs, save_interval=5, early_stop_patience=None, save_val_img=True, save_train_img=False):
-        """Train the model for a specified number of epochs, saving the best model based on the validation loss.
+        """Train the model for a specified number of epochs, saving the last model and the best model based on the validation loss.
 
         Parameters
         ----------
@@ -294,13 +308,24 @@ class Trainer:
             Number of epochs to train the model for.
         save_interval : int, optional
             Interval at which to save the model checkpoint. Default is 5. 
-            If set to 0, only the best model is saved. If set to 1, the model is saved after every epoch.
+            If set to 0, only the best and last models are saved. If set to 1, the model is saved after every epoch.
         early_stop_patience : int, optional
             If provided, training will stop if the validation loss does not improve after this number of epochs.
         save__val_img : bool, optional
             If True, save the input images, predictions, and masks during validation. Default is True.
         save_train_img : bool, optional
             If True, save the input images, predictions, and masks during training. Default is False.
+
+        Returns
+        -------
+        list
+            List of training losses for each epoch.
+        list
+            List of validation losses for each epoch.
+        list
+            List of accuracies on the validation set for each epoch.
+        list
+            List of Dice scores on the validation set for each epoch.
         """
 
         best_val_dice = 0
@@ -324,10 +349,14 @@ class Trainer:
             # Perform a training step
             train_loss = self.train_step(save_img_train_dir)
             print(f"Training Loss: {train_loss:.4f}")
+            self.train_loss.append(train_loss)
 
             # Perform a validation step
             val_loss, val_accuracy, val_dice = self.val_step(save_img_val_dir)
             print(f"Validation Loss: {val_loss:.4f}  -  Accuracy: {val_accuracy:.4f}  -  Dice Score: {val_dice:.4f}")
+            self.val_loss.append(val_loss)
+            self.val_accuracy.append(val_accuracy)
+            self.val_dice.append(val_dice)
 
             # Save the model checkpoint    
             if save_interval > 0 and epoch % save_interval == 0:
@@ -346,3 +375,8 @@ class Trainer:
                     if patience_counter >= early_stop_patience:
                         print(f"Early stopping at epoch {epoch}")
                         break
+            
+        # Save the last model
+        self.save_checkpoint('checkpoints/last.pth')
+
+        return self.train_loss, self.val_loss, self.val_accuracy, self.val_dice

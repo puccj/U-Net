@@ -8,6 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="canonical" href="https://puccj.github.io/U-Net/_modules/trainer.html" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -116,6 +117,16 @@
 <span class="sd">        DataLoader for the training dataset.</span>
 <span class="sd">    val_loader : torch.utils.data.DataLoader</span>
 <span class="sd">        DataLoader for the validation dataset.</span>
+<span class="sd">    model_is_binary : bool</span>
+<span class="sd">        True if the model is a binary segmentation model, False if it is a multi-class segmentation model.</span>
+<span class="sd">    train_loss : list</span>
+<span class="sd">        List of training losses for each epoch.</span>
+<span class="sd">    val_loss : list</span>
+<span class="sd">        List of validation losses for each epoch.</span>
+<span class="sd">    val_accuracy : list</span>
+<span class="sd">        List of accuracies on the validation set for each epoch.</span>
+<span class="sd">    val_dice : list</span>
+<span class="sd">        List of Dice scores on the validation set for each epoch.</span>
 <span class="sd">    loss_fn : torch.nn.Module</span>
 <span class="sd">        Loss function to be used for training.</span>
 <span class="sd">    device : str</span>
@@ -173,6 +184,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">val_loader</span> <span class="o">=</span> <span class="n">val_loader</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_is_binary</span> <span class="o">=</span> <span class="p">(</span>   <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;is_binary&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">is_binary</span><span class="p">)</span> 
                                 <span class="ow">or</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;final_conv&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">final_conv</span><span class="o">.</span><span class="n">out_channels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_loss</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_loss</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_accuracy</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_dice</span> <span class="o">=</span> <span class="p">[]</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">loss_fn</span>
         <span class="k">if</span> <span class="n">loss_fn</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
@@ -297,10 +312,10 @@
                     <span class="n">prediction</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                     <span class="n">prediction</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-                <span class="n">num_correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">prediction</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="n">num_correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">prediction</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
                 <span class="n">num_pixels</span> <span class="o">+=</span> <span class="n">y</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
                 
-                <span class="n">total_dice</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">prediction</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="p">((</span><span class="n">prediction</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span> <span class="c1"># add epsilon to avoid division by zero</span>
+                <span class="n">total_dice</span> <span class="o">+=</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">prediction</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="p">((</span><span class="n">prediction</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">))</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="c1"># add epsilon to avoid division by zero</span>
 
                 <span class="c1"># Update tqdm loop</span>
                 <span class="n">loop</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
@@ -378,7 +393,7 @@
 <div class="viewcode-block" id="Trainer.train">
 <a class="viewcode-back" href="../trainer.html#trainer.Trainer.train">[docs]</a>
     <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">early_stop_patience</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_val_img</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_train_img</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Train the model for a specified number of epochs, saving the best model based on the validation loss.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Train the model for a specified number of epochs, saving the last model and the best model based on the validation loss.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -386,13 +401,24 @@
 <span class="sd">            Number of epochs to train the model for.</span>
 <span class="sd">        save_interval : int, optional</span>
 <span class="sd">            Interval at which to save the model checkpoint. Default is 5. </span>
-<span class="sd">            If set to 0, only the best model is saved. If set to 1, the model is saved after every epoch.</span>
+<span class="sd">            If set to 0, only the best and last models are saved. If set to 1, the model is saved after every epoch.</span>
 <span class="sd">        early_stop_patience : int, optional</span>
 <span class="sd">            If provided, training will stop if the validation loss does not improve after this number of epochs.</span>
 <span class="sd">        save__val_img : bool, optional</span>
 <span class="sd">            If True, save the input images, predictions, and masks during validation. Default is True.</span>
 <span class="sd">        save_train_img : bool, optional</span>
 <span class="sd">            If True, save the input images, predictions, and masks during training. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            List of training losses for each epoch.</span>
+<span class="sd">        list</span>
+<span class="sd">            List of validation losses for each epoch.</span>
+<span class="sd">        list</span>
+<span class="sd">            List of accuracies on the validation set for each epoch.</span>
+<span class="sd">        list</span>
+<span class="sd">            List of Dice scores on the validation set for each epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">best_val_dice</span> <span class="o">=</span> <span class="mi">0</span>
@@ -416,10 +442,14 @@
             <span class="c1"># Perform a training step</span>
             <span class="n">train_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span><span class="n">save_img_train_dir</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training Loss: </span><span class="si">{</span><span class="n">train_loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">train_loss</span><span class="p">)</span>
 
             <span class="c1"># Perform a validation step</span>
             <span class="n">val_loss</span><span class="p">,</span> <span class="n">val_accuracy</span><span class="p">,</span> <span class="n">val_dice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_step</span><span class="p">(</span><span class="n">save_img_val_dir</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Loss: </span><span class="si">{</span><span class="n">val_loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  -  Accuracy: </span><span class="si">{</span><span class="n">val_accuracy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  -  Dice Score: </span><span class="si">{</span><span class="n">val_dice</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_accuracy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val_accuracy</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_dice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val_dice</span><span class="p">)</span>
 
             <span class="c1"># Save the model checkpoint    </span>
             <span class="k">if</span> <span class="n">save_interval</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">epoch</span> <span class="o">%</span> <span class="n">save_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -437,7 +467,12 @@
                     <span class="n">patience_counter</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="n">patience_counter</span> <span class="o">&gt;=</span> <span class="n">early_stop_patience</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Early stopping at epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="k">break</span></div>
+                        <span class="k">break</span>
+            
+        <span class="c1"># Save the last model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span><span class="s1">&#39;checkpoints/last.pth&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_loss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_loss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_accuracy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_dice</span></div>
 </div>
 
 </pre></div>

@@ -55,6 +55,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.optimizer"><code class="docutils literal notranslate"><span class="pre">Trainer.optimizer</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.train_loader"><code class="docutils literal notranslate"><span class="pre">Trainer.train_loader</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.val_loader"><code class="docutils literal notranslate"><span class="pre">Trainer.val_loader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.model_is_binary"><code class="docutils literal notranslate"><span class="pre">Trainer.model_is_binary</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.train_loss"><code class="docutils literal notranslate"><span class="pre">Trainer.train_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.val_loss"><code class="docutils literal notranslate"><span class="pre">Trainer.val_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.val_accuracy"><code class="docutils literal notranslate"><span class="pre">Trainer.val_accuracy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.val_dice"><code class="docutils literal notranslate"><span class="pre">Trainer.val_dice</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.loss_fn"><code class="docutils literal notranslate"><span class="pre">Trainer.loss_fn</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.device"><code class="docutils literal notranslate"><span class="pre">Trainer.device</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.scaler"><code class="docutils literal notranslate"><span class="pre">Trainer.scaler</span></code></a></li>
@@ -160,6 +165,61 @@ During validation, the model’s predictions can be saved as images for visualiz
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.model_is_binary">
+<span class="sig-name descname"><span class="pre">model_is_binary</span></span><a class="headerlink" href="#trainer.Trainer.model_is_binary" title="Link to this definition"></a></dt>
+<dd><p>True if the model is a binary segmentation model, False if it is a multi-class segmentation model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.train_loss">
+<span class="sig-name descname"><span class="pre">train_loss</span></span><a class="headerlink" href="#trainer.Trainer.train_loss" title="Link to this definition"></a></dt>
+<dd><p>List of training losses for each epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.val_loss">
+<span class="sig-name descname"><span class="pre">val_loss</span></span><a class="headerlink" href="#trainer.Trainer.val_loss" title="Link to this definition"></a></dt>
+<dd><p>List of validation losses for each epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.val_accuracy">
+<span class="sig-name descname"><span class="pre">val_accuracy</span></span><a class="headerlink" href="#trainer.Trainer.val_accuracy" title="Link to this definition"></a></dt>
+<dd><p>List of accuracies on the validation set for each epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.val_dice">
+<span class="sig-name descname"><span class="pre">val_dice</span></span><a class="headerlink" href="#trainer.Trainer.val_dice" title="Link to this definition"></a></dt>
+<dd><p>List of Dice scores on the validation set for each epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="trainer.Trainer.loss_fn">
 <span class="sig-name descname"><span class="pre">loss_fn</span></span><a class="headerlink" href="#trainer.Trainer.loss_fn" title="Link to this definition"></a></dt>
 <dd><p>Loss function to be used for training.</p>
@@ -251,17 +311,26 @@ If a directory is provided, the most recent checkpoint file in the directory is 
 <dl class="py method">
 <dt class="sig sig-object py" id="id2">
 <span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stop_patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_val_img</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_train_img</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
-<dd><p>Train the model for a specified number of epochs, saving the best model based on the validation loss.</p>
+<dd><p>Train the model for a specified number of epochs, saving the last model and the best model based on the validation loss.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>num_epochs</strong> (<em>int</em>) – Number of epochs to train the model for.</p></li>
 <li><p><strong>save_interval</strong> (<em>int</em><em>, </em><em>optional</em>) – Interval at which to save the model checkpoint. Default is 5.
-If set to 0, only the best model is saved. If set to 1, the model is saved after every epoch.</p></li>
+If set to 0, only the best and last models are saved. If set to 1, the model is saved after every epoch.</p></li>
 <li><p><strong>early_stop_patience</strong> (<em>int</em><em>, </em><em>optional</em>) – If provided, training will stop if the validation loss does not improve after this number of epochs.</p></li>
 <li><p><strong>save__val_img</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, save the input images, predictions, and masks during validation. Default is True.</p></li>
 <li><p><strong>save_train_img</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, save the input images, predictions, and masks during training. Default is False.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>list</em> – List of training losses for each epoch.</p></li>
+<li><p><em>list</em> – List of validation losses for each epoch.</p></li>
+<li><p><em>list</em> – List of accuracies on the validation set for each epoch.</p></li>
+<li><p><em>list</em> – List of Dice scores on the validation set for each epoch.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>

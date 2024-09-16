@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>U-Net &mdash; U-Net 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dataset module" href="dataset.html" />
+    <link rel="prev" title="U-Net documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            U-Net
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">U-Net</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dataset.html">dataset module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trainer.html">trainer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unet.html">unet module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">U-Net</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">U-Net</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="u-net">
+<h1>U-Net<a class="headerlink" href="#u-net" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">dataset module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dataset.html#dataset.SegmentationDataset"><code class="docutils literal notranslate"><span class="pre">SegmentationDataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataset.html#dataset.SegmentationDataset.image_dir"><code class="docutils literal notranslate"><span class="pre">SegmentationDataset.image_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataset.html#dataset.SegmentationDataset.mask_dir"><code class="docutils literal notranslate"><span class="pre">SegmentationDataset.mask_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataset.html#dataset.SegmentationDataset.transform"><code class="docutils literal notranslate"><span class="pre">SegmentationDataset.transform</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataset.html#dataset.SegmentationDataset.images"><code class="docutils literal notranslate"><span class="pre">SegmentationDataset.images</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataset.html#dataset.SegmentationDataset.__len__"><code class="docutils literal notranslate"><span class="pre">SegmentationDataset.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataset.html#dataset.SegmentationDataset.__getitem__"><code class="docutils literal notranslate"><span class="pre">SegmentationDataset.__getitem__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">trainer module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trainer.html#trainer.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.model"><code class="docutils literal notranslate"><span class="pre">Trainer.model</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.optimizer"><code class="docutils literal notranslate"><span class="pre">Trainer.optimizer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.train_loader"><code class="docutils literal notranslate"><span class="pre">Trainer.train_loader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.val_loader"><code class="docutils literal notranslate"><span class="pre">Trainer.val_loader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.loss_fn"><code class="docutils literal notranslate"><span class="pre">Trainer.loss_fn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.device"><code class="docutils literal notranslate"><span class="pre">Trainer.device</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.scaler"><code class="docutils literal notranslate"><span class="pre">Trainer.scaler</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.train_step"><code class="docutils literal notranslate"><span class="pre">Trainer.train_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.val_step"><code class="docutils literal notranslate"><span class="pre">Trainer.val_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.save_checkpoint"><code class="docutils literal notranslate"><span class="pre">Trainer.save_checkpoint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">Trainer.load_checkpoint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#trainer.Trainer.train"><code class="docutils literal notranslate"><span class="pre">Trainer.train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#id0"><code class="docutils literal notranslate"><span class="pre">Trainer.load_checkpoint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#id1"><code class="docutils literal notranslate"><span class="pre">Trainer.save_checkpoint()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#id2"><code class="docutils literal notranslate"><span class="pre">Trainer.train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#id3"><code class="docutils literal notranslate"><span class="pre">Trainer.train_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trainer.html#id4"><code class="docutils literal notranslate"><span class="pre">Trainer.val_step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trainer.html#trainer.ensure_directory_exists"><code class="docutils literal notranslate"><span class="pre">ensure_directory_exists()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="unet.html">unet module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="unet.html#unet.DoubleConvolution"><code class="docutils literal notranslate"><span class="pre">DoubleConvolution</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.DoubleConvolution.double_conv"><code class="docutils literal notranslate"><span class="pre">DoubleConvolution.double_conv</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.DoubleConvolution.forward"><code class="docutils literal notranslate"><span class="pre">DoubleConvolution.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#id0"><code class="docutils literal notranslate"><span class="pre">DoubleConvolution.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="unet.html#unet.UNet"><code class="docutils literal notranslate"><span class="pre">UNet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.UNet.num_features"><code class="docutils literal notranslate"><span class="pre">UNet.num_features</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.UNet.ups"><code class="docutils literal notranslate"><span class="pre">UNet.ups</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.UNet.downs"><code class="docutils literal notranslate"><span class="pre">UNet.downs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.UNet.pool"><code class="docutils literal notranslate"><span class="pre">UNet.pool</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.UNet.bottleneck"><code class="docutils literal notranslate"><span class="pre">UNet.bottleneck</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.UNet.final_conv"><code class="docutils literal notranslate"><span class="pre">UNet.final_conv</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.UNet.is_binary"><code class="docutils literal notranslate"><span class="pre">UNet.is_binary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#unet.UNet.forward"><code class="docutils literal notranslate"><span class="pre">UNet.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#id1"><code class="docutils literal notranslate"><span class="pre">UNet.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="unet.html#id2"><code class="docutils literal notranslate"><span class="pre">UNet.is_binary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="U-Net documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dataset.html" class="btn btn-neutral float-right" title="dataset module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, puccj.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trainer module &mdash; U-Net 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="unet module" href="unet.html" />
+    <link rel="prev" title="dataset module" href="dataset.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            U-Net
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">U-Net</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dataset.html">dataset module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">trainer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trainer.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.model"><code class="docutils literal notranslate"><span class="pre">Trainer.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.optimizer"><code class="docutils literal notranslate"><span class="pre">Trainer.optimizer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.train_loader"><code class="docutils literal notranslate"><span class="pre">Trainer.train_loader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.val_loader"><code class="docutils literal notranslate"><span class="pre">Trainer.val_loader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.loss_fn"><code class="docutils literal notranslate"><span class="pre">Trainer.loss_fn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.device"><code class="docutils literal notranslate"><span class="pre">Trainer.device</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.scaler"><code class="docutils literal notranslate"><span class="pre">Trainer.scaler</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.train_step"><code class="docutils literal notranslate"><span class="pre">Trainer.train_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.val_step"><code class="docutils literal notranslate"><span class="pre">Trainer.val_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.save_checkpoint"><code class="docutils literal notranslate"><span class="pre">Trainer.save_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">Trainer.load_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trainer.Trainer.train"><code class="docutils literal notranslate"><span class="pre">Trainer.train()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Trainer.load_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Trainer.save_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">Trainer.train()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">Trainer.train_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">Trainer.val_step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#trainer.ensure_directory_exists"><code class="docutils literal notranslate"><span class="pre">ensure_directory_exists()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="unet.html">unet module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">U-Net</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">U-Net</a></li>
+      <li class="breadcrumb-item active">trainer module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/trainer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-trainer">
+<span id="trainer-module"></span><h1>trainer module<a class="headerlink" href="#module-trainer" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="trainer.Trainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trainer.</span></span><span class="sig-name descname"><span class="pre">Trainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trainer.Trainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Trainer class for training and validating a PyTorch model on a dataset.</p>
+<p>This class provides methods to train the model on a training dataset, validate it on a
+validation dataset, and save/load model checkpoints for resuming training or inference.
+During training, the model is saved at regular intervals and the
+best model based on the validation loss is saved separately.
+During validation, the model’s predictions can be saved as images for visualization.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#trainer.Trainer.model" title="Link to this definition"></a></dt>
+<dd><p>Model to be trained and validated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.nn.Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.optimizer">
+<span class="sig-name descname"><span class="pre">optimizer</span></span><a class="headerlink" href="#trainer.Trainer.optimizer" title="Link to this definition"></a></dt>
+<dd><p>Optimizer to be used for training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.optim.Optimizer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.train_loader">
+<span class="sig-name descname"><span class="pre">train_loader</span></span><a class="headerlink" href="#trainer.Trainer.train_loader" title="Link to this definition"></a></dt>
+<dd><p>DataLoader for the training dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.utils.data.DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.val_loader">
+<span class="sig-name descname"><span class="pre">val_loader</span></span><a class="headerlink" href="#trainer.Trainer.val_loader" title="Link to this definition"></a></dt>
+<dd><p>DataLoader for the validation dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.utils.data.DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.loss_fn">
+<span class="sig-name descname"><span class="pre">loss_fn</span></span><a class="headerlink" href="#trainer.Trainer.loss_fn" title="Link to this definition"></a></dt>
+<dd><p>Loss function to be used for training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.nn.Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.device">
+<span class="sig-name descname"><span class="pre">device</span></span><a class="headerlink" href="#trainer.Trainer.device" title="Link to this definition"></a></dt>
+<dd><p>Device to run the model on (‘cuda’ or ‘cpu’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trainer.Trainer.scaler">
+<span class="sig-name descname"><span class="pre">scaler</span></span><a class="headerlink" href="#trainer.Trainer.scaler" title="Link to this definition"></a></dt>
+<dd><p>Gradient scaler to prevent underflow and overflow during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.cuda.amp.GradScaler</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trainer.Trainer.train_step">
+<span class="sig-name descname"><span class="pre">train_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.train_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trainer.Trainer.train_step" title="Link to this definition"></a></dt>
+<dd><p>Performs a single training step (forward and backward pass for one epoch) on the training dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trainer.Trainer.val_step">
+<span class="sig-name descname"><span class="pre">val_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_img_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.val_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trainer.Trainer.val_step" title="Link to this definition"></a></dt>
+<dd><p>Performs validation on the validation dataset and optionally saves images of predictions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trainer.Trainer.save_checkpoint">
+<span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'checkpoints/last.pth'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.save_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trainer.Trainer.save_checkpoint" title="Link to this definition"></a></dt>
+<dd><p>Save the model and optimizer state to a checkpoint file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trainer.Trainer.load_checkpoint">
+<span class="sig-name descname"><span class="pre">load_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.load_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trainer.Trainer.load_checkpoint" title="Link to this definition"></a></dt>
+<dd><p>Load the model and optimizer state from a checkpoint file or directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trainer.Trainer.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stop_patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_img</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trainer.Trainer.train" title="Link to this definition"></a></dt>
+<dd><p>Train the model for a specified number of epochs, saving the best model based on the validation loss.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">load_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.load_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Load the model and optimizer state from a checkpoint file or directory.
+If a directory is provided, the most recent checkpoint file in the directory is loaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to the checkpoint file or directory containing the checkpoint files.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>FileNotFoundError</strong> – If the file does not exist or the directory is empty.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'checkpoints/last.pth'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.save_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>Save the model and optimizer state to a checkpoint file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to the checkpoint file. Default is ‘checkpoints/last.pth’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stop_patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_val_img</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_train_img</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>Train the model for a specified number of epochs, saving the best model based on the validation loss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_epochs</strong> (<em>int</em>) – Number of epochs to train the model for.</p></li>
+<li><p><strong>save_interval</strong> (<em>int</em><em>, </em><em>optional</em>) – Interval at which to save the model checkpoint. Default is 5.
+If set to 0, only the best model is saved. If set to 1, the model is saved after every epoch.</p></li>
+<li><p><strong>early_stop_patience</strong> (<em>int</em><em>, </em><em>optional</em>) – If provided, training will stop if the validation loss does not improve after this number of epochs.</p></li>
+<li><p><strong>save__val_img</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, save the input images, predictions, and masks during validation. Default is True.</p></li>
+<li><p><strong>save_train_img</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, save the input images, predictions, and masks during training. Default is False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">train_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_img_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.train_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>Performs a single training step (forward and backward pass for one epoch) on the training dataset.
+Optionally saves images of the input, predictions, and masks during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>save_img_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, directory where the input images, predictions, and masks will be saved.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Average loss over the training set.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">val_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_img_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#Trainer.val_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd><p>Performs validation on the validation dataset.
+Optionally saves images of the input, predictions, and masks during validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>save_img_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, directory where the input images, predictions, and masks will be saved.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>float</em> – Average loss over the validation set.</p></li>
+<li><p><em>float</em> – Accuracy of the model on the validation set (ratio of correct predictions to total pixels).</p></li>
+<li><p><em>float</em> – Average Dice score of the model on the validation set.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trainer.ensure_directory_exists">
+<span class="sig-prename descclassname"><span class="pre">trainer.</span></span><span class="sig-name descname"><span class="pre">ensure_directory_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/trainer.html#ensure_directory_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trainer.ensure_directory_exists" title="Link to this definition"></a></dt>
+<dd><p>Ensures that the directory of the file path exists, and creates it if it doesn’t.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – Path to the file whose directory needs to be created if it doesn’t exist.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dataset.html" class="btn btn-neutral float-left" title="dataset module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="unet.html" class="btn btn-neutral float-right" title="unet module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, puccj.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

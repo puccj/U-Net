@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 test.py
 data
+make_docs/
 
 saved_images/
 checkpoints/

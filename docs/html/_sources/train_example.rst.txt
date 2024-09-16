@@ -1,0 +1,7 @@
+train\_example module
+=====================
+
+.. automodule:: train_example
+   :members:
+   :undoc-members:
+   :show-inheritance:

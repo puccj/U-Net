@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>unet module &mdash; U-Net 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="trainer module" href="trainer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            U-Net
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">U-Net</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dataset.html">dataset module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trainer.html">trainer module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">unet module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#unet.DoubleConvolution"><code class="docutils literal notranslate"><span class="pre">DoubleConvolution</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#unet.DoubleConvolution.double_conv"><code class="docutils literal notranslate"><span class="pre">DoubleConvolution.double_conv</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unet.DoubleConvolution.forward"><code class="docutils literal notranslate"><span class="pre">DoubleConvolution.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DoubleConvolution.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#unet.UNet"><code class="docutils literal notranslate"><span class="pre">UNet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#unet.UNet.num_features"><code class="docutils literal notranslate"><span class="pre">UNet.num_features</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unet.UNet.ups"><code class="docutils literal notranslate"><span class="pre">UNet.ups</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unet.UNet.downs"><code class="docutils literal notranslate"><span class="pre">UNet.downs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unet.UNet.pool"><code class="docutils literal notranslate"><span class="pre">UNet.pool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unet.UNet.bottleneck"><code class="docutils literal notranslate"><span class="pre">UNet.bottleneck</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unet.UNet.final_conv"><code class="docutils literal notranslate"><span class="pre">UNet.final_conv</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unet.UNet.is_binary"><code class="docutils literal notranslate"><span class="pre">UNet.is_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unet.UNet.forward"><code class="docutils literal notranslate"><span class="pre">UNet.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">UNet.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">UNet.is_binary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">U-Net</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">U-Net</a></li>
+      <li class="breadcrumb-item active">unet module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/unet.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-unet">
+<span id="unet-module"></span><h1>unet module<a class="headerlink" href="#module-unet" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="unet.DoubleConvolution">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">unet.</span></span><span class="sig-name descname"><span class="pre">DoubleConvolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unet.html#DoubleConvolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#unet.DoubleConvolution" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Applies double convolution to the input</p>
+<p>Double convolution is a sequence of two 3x3 convolutional layers with batch normalization and ReLU activation function.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unet.DoubleConvolution.double_conv">
+<span class="sig-name descname"><span class="pre">double_conv</span></span><a class="headerlink" href="#unet.DoubleConvolution.double_conv" title="Link to this definition"></a></dt>
+<dd><p>Sequence of two convolutional layers with batch normalization and ReLU activation function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Sequential</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unet.DoubleConvolution.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unet.html#DoubleConvolution.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#unet.DoubleConvolution.forward" title="Link to this definition"></a></dt>
+<dd><p>Perform the forward propagation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unet.html#DoubleConvolution.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Perform the forward propagation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor to be processed by the double convolution</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor after applying the double convolution</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="unet.UNet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">unet.</span></span><span class="sig-name descname"><span class="pre">UNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[64,</span> <span class="pre">128,</span> <span class="pre">256,</span> <span class="pre">512]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unet.html#UNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#unet.UNet" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>UNet model</p>
+<p>UNet is a convolutional neural network used for image segmentation. It consists of an encoder and a decoder. The encoder
+downsamples the input image and the decoder upsamples the encoder’s output to the original size. The encoder and decoder
+are connected by so-called skip connections, which concatenate the output of the encoder to the input of the decoder at the
+same resolution. This helps the decoder to recover the spatial information lost during downsampling. The skip connections
+are concatenated channel-wise, which means that the number of channels is doubled after each concatenation. The UNet model
+has a contracting path (encoder) and an expansive path (decoder): the contracting path follows the typical architecture of
+a convolutional neural network, with a series of convolutional layers followed by a max-pooling layer. The expansive path
+consists of a series of up-convolutions, which increase the spatial resolution of the input, followed by a series of
+convolutional layers. The final layer of the UNet model is a 1x1 convolutional layer that maps each pixel to the desired
+number of classes.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unet.UNet.num_features">
+<span class="sig-name descname"><span class="pre">num_features</span></span><a class="headerlink" href="#unet.UNet.num_features" title="Link to this definition"></a></dt>
+<dd><p>Number of features in the encoder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unet.UNet.ups">
+<span class="sig-name descname"><span class="pre">ups</span></span><a class="headerlink" href="#unet.UNet.ups" title="Link to this definition"></a></dt>
+<dd><p>List of up-convolutions in the decoder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unet.UNet.downs">
+<span class="sig-name descname"><span class="pre">downs</span></span><a class="headerlink" href="#unet.UNet.downs" title="Link to this definition"></a></dt>
+<dd><p>List of double convolutions in the encoder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unet.UNet.pool">
+<span class="sig-name descname"><span class="pre">pool</span></span><a class="headerlink" href="#unet.UNet.pool" title="Link to this definition"></a></dt>
+<dd><p>Max pooling layer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.MaxPool2d</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unet.UNet.bottleneck">
+<span class="sig-name descname"><span class="pre">bottleneck</span></span><a class="headerlink" href="#unet.UNet.bottleneck" title="Link to this definition"></a></dt>
+<dd><p>Bottleneck layer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#unet.DoubleConvolution" title="unet.DoubleConvolution">DoubleConvolution</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="unet.UNet.final_conv">
+<span class="sig-name descname"><span class="pre">final_conv</span></span><a class="headerlink" href="#unet.UNet.final_conv" title="Link to this definition"></a></dt>
+<dd><p>Final convolutional layer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nn.Conv2d</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unet.UNet.is_binary">
+<span class="sig-name descname"><span class="pre">is_binary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/unet.html#UNet.is_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#unet.UNet.is_binary" title="Link to this definition"></a></dt>
+<dd><p>Returns whether the model output is binary or multi-class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="unet.UNet.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unet.html#UNet.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#unet.UNet.forward" title="Link to this definition"></a></dt>
+<dd><p>Perform the forward propagation</p>
+</dd></dl>
+
+<p class="rubric">References</p>
+<p>Ronneberger, O., Fischer, P., &amp; Brox, T. (2015). U-Net: Convolutional Networks for Biomedical Image Segmentation. arXiv preprint arXiv:1505.04597.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unet.html#UNet.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>Perform the forward propagation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor to be processed by the UNet model of shape (batch_size, in_channels, height, width)</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the input tensor sizes is less then 2^(len(features)+1), since the tensor sizes are halved in each downsampling step</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Output tensor after applying the UNet model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">is_binary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/unet.html#UNet.is_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>Returns whether the model output is binary or multi-class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the model output is binary, False if the model output is multi-class</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trainer.html" class="btn btn-neutral float-left" title="trainer module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, puccj.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

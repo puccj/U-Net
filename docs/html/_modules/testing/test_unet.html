@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>testing.test_unet &mdash; U-Net 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            U-Net
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">U-Net</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">U-Net</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">testing.test_unet</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for testing.test_unet</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">from</span> <span class="nn">unittest.mock</span> <span class="kn">import</span> <span class="n">patch</span>
+<span class="kn">from</span> <span class="nn">hypothesis</span> <span class="kn">import</span> <span class="n">given</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">settings</span>
+<span class="kn">import</span> <span class="nn">hypothesis.strategies</span> <span class="k">as</span> <span class="nn">st</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="kn">from</span> <span class="nn">unet</span> <span class="kn">import</span> <span class="n">DoubleConvolution</span><span class="p">,</span> <span class="n">UNet</span>
+
+
+<div class="viewcode-block" id="make_test_deterministic">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.make_test_deterministic">[docs]</a>
+<span class="k">def</span> <span class="nf">make_test_deterministic</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+    <span class="s2">&quot;Set the random seed and ensure all tests are deterministic&quot;</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="ow">and</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<span class="c1">############## Test DoubleConvolution class ##############</span>
+<span class="c1"># Test DoubleConvolution constructor (init method)</span>
+
+<div class="viewcode-block" id="test_double_convolution_in_channels">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_in_channels">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="nb">input</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span>
+       <span class="n">output</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">))</span>
+<span class="nd">@example</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_double_convolution_in_channels</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+    <span class="c1"># Check if the in_channels parameter is correctly set</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">double_conv</span><span class="o">.</span><span class="n">double_conv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">in_channels</span> <span class="o">==</span> <span class="nb">input</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_out_channels">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_out_channels">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="nb">input</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span>
+       <span class="n">output</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">))</span>
+<span class="nd">@example</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_double_convolution_out_channels</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+    <span class="c1"># Check if the out_channels parameter is correctly set</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">double_conv</span><span class="o">.</span><span class="n">double_conv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">out_channels</span> <span class="o">==</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_length">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_length">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="nb">input</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span>
+       <span class="n">output</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">))</span>
+<span class="nd">@example</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_double_convolution_length</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+    <span class="c1"># Check if the length of the DoubleConvolution layer is 6</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">double_conv</span><span class="o">.</span><span class="n">double_conv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_negative_in_channels">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_negative_in_channels">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_negative_in_channels</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when in_channels is negative</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_negative_out_channels">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_negative_out_channels">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_negative_out_channels</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when out_channels is negative</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=-</span><span class="mi">64</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_zero_in_channels">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_zero_in_channels">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_zero_in_channels</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when in_channels is negative</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_zero_out_channels">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_zero_out_channels">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_zero_out_channels</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when in_channels is negative</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Test DoubleConvolution forward method</span>
+
+<div class="viewcode-block" id="test_double_convolution_forward_called">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_forward_called">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_forward_called</span><span class="p">():</span>
+    <span class="c1"># Check that the forward method was called once</span>
+    <span class="c1"># forward method should be triggered by the __call__ method of nn.Module</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">DoubleConvolution</span><span class="p">,</span> <span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">wraps</span><span class="o">=</span><span class="n">double_conv</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_forward</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+        <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">mock_forward</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_forward_called_with_correct_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_forward_called_with_correct_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_forward_called_with_correct_input</span><span class="p">():</span>
+    <span class="c1"># Check that the forward method was called once with the correct input</span>
+    <span class="c1"># forward method should be triggered by the __call__ method of nn.Module</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">DoubleConvolution</span><span class="p">,</span> <span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">wraps</span><span class="o">=</span><span class="n">double_conv</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_forward</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+        <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">mock_forward</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_same_channel">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_same_channel">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="n">inp</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span>
+       <span class="n">out</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span>
+       <span class="n">batch</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+       <span class="n">width</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+       <span class="n">height</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">inp</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_double_convolution_same_channel</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="c1"># Check if the output has the same number of channels as the out_channels parameter</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">inp</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_same_size">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_same_size">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+       <span class="n">channels</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+       <span class="n">width</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+       <span class="n">height</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">channels</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_double_convolution_same_size</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="c1"># Check if the output size matches the input size</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_correct_shape">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_correct_shape">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="n">inp</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span>
+       <span class="n">out</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span>
+       <span class="n">batch</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+       <span class="n">width</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+       <span class="n">height</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">inp</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">out</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">inp</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">out</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">161</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">161</span><span class="p">)</span>    <span class="c1"># odd dimension input tensor</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">inp</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">out</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">)</span>  <span class="c1"># big size input tensor</span>
+<span class="k">def</span> <span class="nf">test_double_convolution_correct_shape</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="c1"># Check if the output shape is as expected</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">inp</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_zero_sizes">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_zero_sizes">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_zero_sizes</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the input tensor size is zero</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+        <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_non_tensor_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_non_tensor_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_non_tensor_input</span><span class="p">():</span>
+    <span class="c1"># Check if a TypeError is raised when the input is not a tensor</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_non_4d_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_non_4d_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_non_4d_input</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the input is not a 4D-tensor</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+        <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_wrong_channel_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_wrong_channel_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_wrong_channel_input</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the number of channel of input (1) is different from the model (3)</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+        <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_wrong_channel_input2">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_wrong_channel_input2">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_wrong_channel_input2</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the number of channel of input (3) is different from the model (1)</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+        <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_double_convolution_small_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_double_convolution_small_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_double_convolution_small_input</span><span class="p">():</span>
+    <span class="c1"># Check if a ValueError is raised when input is tensor sizes is 1</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">double_conv</span> <span class="o">=</span> <span class="n">DoubleConvolution</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">double_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+
+<span class="c1">############## Test UNet class ##############</span>
+<span class="c1"># Test UNet constructor (init method)</span>
+
+<div class="viewcode-block" id="test_downs_length">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_downs_length">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="n">features</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">lists</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">test_downs_length</span><span class="p">(</span><span class="n">features</span><span class="p">):</span>
+    <span class="c1"># Check if the length of self.downs matches the length of the features list</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">downs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_ups_length">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_ups_length">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="n">features</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">lists</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">512</span><span class="p">),</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">test_ups_length</span><span class="p">(</span><span class="n">features</span><span class="p">):</span>
+    <span class="c1"># Check if the length of self.ups is twice the length of the features list</span>
+    <span class="c1"># because each up layer has a ConvTranspose2d followed by a DoubleConvolution</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">ups</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_pooling_layer">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_pooling_layer">[docs]</a>
+<span class="k">def</span> <span class="nf">test_pooling_layer</span><span class="p">():</span>
+    <span class="c1"># Check if pooling layer is correctly initialized</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">stride</span> <span class="o">==</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="test_bottleneck_layer">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_bottleneck_layer">[docs]</a>
+<span class="k">def</span> <span class="nf">test_bottleneck_layer</span><span class="p">():</span>
+    <span class="c1"># Check if the bottleneck layer is correctly initialized</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">bottleneck</span><span class="p">,</span> <span class="n">DoubleConvolution</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">bottleneck</span><span class="o">.</span><span class="n">double_conv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">in_channels</span> <span class="o">==</span> <span class="mi">512</span>
+    <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">bottleneck</span><span class="o">.</span><span class="n">double_conv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">out_channels</span> <span class="o">==</span> <span class="mi">1024</span></div>
+
+
+<div class="viewcode-block" id="test_final_conv_layer">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_final_conv_layer">[docs]</a>
+<span class="k">def</span> <span class="nf">test_final_conv_layer</span><span class="p">():</span>
+    <span class="c1"># Check if the final convolution layer is correctly initialized</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">final_conv</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">final_conv</span><span class="o">.</span><span class="n">in_channels</span> <span class="o">==</span> <span class="mi">64</span>
+    <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">final_conv</span><span class="o">.</span><span class="n">out_channels</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="test_negative_in_channels">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_negative_in_channels">[docs]</a>
+<span class="k">def</span> <span class="nf">test_negative_in_channels</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the input channels are negative</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="test_negative_out_channels">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_negative_out_channels">[docs]</a>
+<span class="k">def</span> <span class="nf">test_negative_out_channels</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the output channels are negative</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="test_min_features">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_min_features">[docs]</a>
+<span class="k">def</span> <span class="nf">test_min_features</span><span class="p">():</span>
+    <span class="c1"># Check if a ValueError is raised when the number of features is less than 2</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="test_negative_features">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_negative_features">[docs]</a>
+<span class="k">def</span> <span class="nf">test_negative_features</span><span class="p">():</span>
+    <span class="c1"># Check if a ValueError is raised when the features are negative</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span></div>
+
+
+
+<span class="c1"># Test UNet is_binary method</span>
+
+<div class="viewcode-block" id="test_is_binary">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_is_binary">[docs]</a>
+<span class="k">def</span> <span class="nf">test_is_binary</span><span class="p">():</span>
+    <span class="c1"># Check if the is_binary method returns True when the output channels is 1</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">is_binary</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="test_is_not_binary">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_is_not_binary">[docs]</a>
+<span class="k">def</span> <span class="nf">test_is_not_binary</span><span class="p">():</span>
+    <span class="c1"># Check if the is_binary method returns False when the output channels is not 1</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">is_binary</span><span class="p">()</span> <span class="o">==</span> <span class="kc">False</span></div>
+
+
+
+<span class="c1"># Test UNet forward method</span>
+
+<div class="viewcode-block" id="test_forward_called">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_called">[docs]</a>
+<span class="k">def</span> <span class="nf">test_forward_called</span><span class="p">():</span>
+    <span class="c1"># Check that the forward method was called once</span>
+    <span class="c1"># forward method should be triggered by the __call__ method of nn.Module</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">UNet</span><span class="p">,</span> <span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">wraps</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_forward</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>  <span class="c1"># dummy input tensor</span>
+        <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">mock_forward</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="test_forward_called_with_correct_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_called_with_correct_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_forward_called_with_correct_input</span><span class="p">():</span>
+    <span class="c1"># Check that the forward method was called once with the correct input</span>
+    <span class="c1"># forward method should be triggered by the __call__ method of nn.Module</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">UNet</span><span class="p">,</span> <span class="s1">&#39;forward&#39;</span><span class="p">,</span> <span class="n">wraps</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_forward</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">mock_forward</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_forward_correct_channel">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_correct_channel">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+       <span class="n">channels</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+       <span class="n">width</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+       <span class="n">height</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">channels</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_forward_correct_channel</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="c1"># Check if the output has the correct number of channels</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">channels</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="test_forward_same_size">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_same_size">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+       <span class="n">channels</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+       <span class="n">width</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+       <span class="n">height</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">channels</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_forward_same_size</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="c1"># Check if the output size matches the input size</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">channels</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="test_forward_correct_shape">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_correct_shape">[docs]</a>
+<span class="nd">@given</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+       <span class="n">channels</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+       <span class="n">width</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+       <span class="n">height</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">channels</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">channels</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">161</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">161</span><span class="p">)</span>    <span class="c1"># odd dimension input tensor</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">batch</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">channels</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">512</span><span class="p">)</span>    <span class="c1"># big size input tensor</span>
+<span class="k">def</span> <span class="nf">test_forward_correct_shape</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="c1"># Check if the output shape is as expected</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">channels</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_forward_non_tensor_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_non_tensor_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_forward_non_tensor_input</span><span class="p">():</span>
+    <span class="c1"># Check if a TypeError is raised when the input is not a tensor</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">()</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
+        <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_forward_non_4d_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_non_4d_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_forward_non_4d_input</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the input is not a 4D-tensor</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">()</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+        <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_forward_wrong_channel_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_wrong_channel_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_forward_wrong_channel_input</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the number of channel of input (1) is different from the model (3)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">()</span>  <span class="c1"># default input channel is 3</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+        <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_forward_wrong_channel_input2">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_wrong_channel_input2">[docs]</a>
+<span class="k">def</span> <span class="nf">test_forward_wrong_channel_input2</span><span class="p">():</span>
+    <span class="c1"># Check if a RuntimeError is raised when the number of channel of input (3) is different from the model (1)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">])</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+        <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_forward_small_input">
+<a class="viewcode-back" href="../../testing.html#testing.test_unet.test_forward_small_input">[docs]</a>
+<span class="k">def</span> <span class="nf">test_forward_small_input</span><span class="p">():</span>
+    <span class="c1"># Check if a ValueError is raised when input is tensor sizes is less then 2^(len(features)+1)</span>
+    <span class="n">make_test_deterministic</span><span class="p">()</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">()</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, puccj.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -34,7 +34,7 @@ In order to run the tests, the following two packages are also needed:
 - `pytest`
 - `hypothesis`
 
-In the file `train_example.py`, the package `albumentation` is also used.
+In the file `train_example.ipynb`, the packages `albumentation` and `matplotlib` are also used.
 
 ## Installation
 
@@ -57,7 +57,7 @@ pip install -r requirements.txt
 ```
 
 ## Documentation
-All the documentation is published at [https://puccj.github.io/U-Net](https://puccj.github.io/U-Net). Also, the file `train_example.py` shows an example of code usage.
+All the documentation is published at [https://puccj.github.io/U-Net](https://puccj.github.io/U-Net). Also, the file `train_example.ipynb` shows an example of code usage.
 
 ## Testing
 A Testing routine is implemented, by using the `pytest` and `hypothesis` libraries. The test files are inside the `testing` directory. It is possible to run all the tests with:

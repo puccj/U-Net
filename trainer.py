@@ -328,7 +328,7 @@ class Trainer:
             List of Dice scores on the validation set for each epoch.
         """
 
-        best_val_dice = 0
+        best_val_loss = 0
         patience_counter = 0
         save_img_val_dir = None
         save_img_train_dir = None
@@ -362,13 +362,13 @@ class Trainer:
             if save_interval > 0 and epoch % save_interval == 0:
                 self.save_checkpoint(f'checkpoints/{epoch}.pth')
             
-            if val_dice > best_val_dice:
-                best_val_dice = val_dice
+            if val_loss > best_val_loss:
+                best_val_loss = val_loss
                 self.save_checkpoint('checkpoints/best.pth')
 
             # Early Stopping check
             if early_stop_patience:
-                if val_dice > best_val_dice:
+                if val_loss < best_val_loss:
                     patience_counter = 0
                 else:
                     patience_counter += 1

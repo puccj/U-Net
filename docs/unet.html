@@ -134,7 +134,7 @@
 <dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor to be processed by the double convolution</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Output tensor after applying the double convolution</p>
+<dd class="field-even"><p><strong>result</strong> – Output tensor after applying the double convolution</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
@@ -251,7 +251,7 @@ number of classes.</p>
 <dd class="field-even"><p><strong>ValueError</strong> – If the input tensor sizes is less then 2^(len(features)+1), since the tensor sizes are halved in each downsampling step</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Output tensor after applying the UNet model</p>
+<dd class="field-odd"><p><strong>result</strong> – Output tensor after applying the UNet model</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>torch.Tensor</p>
@@ -265,7 +265,7 @@ number of classes.</p>
 <dd><p>Returns whether the model output is binary or multi-class</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if the model output is binary, False if the model output is multi-class</p>
+<dd class="field-odd"><p><strong>binary</strong> – True if the model output is binary, False if the model output is multi-class</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool</p>

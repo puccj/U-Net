@@ -9,7 +9,7 @@ class DoubleConvolution(nn.Module):
     
     Attributes
     ----------
-    double_conv: nn.Sequential
+    double_conv : nn.Sequential
         Sequence of two convolutional layers with batch normalization and ReLU activation function
 
     Methods
@@ -23,9 +23,9 @@ class DoubleConvolution(nn.Module):
         
         Parameters
         ----------
-        in_channels: int
+        in_channels : int
             Number of input channels
-        out_channels: int
+        out_channels : int
             Number of output channels
 
         Raises
@@ -55,12 +55,12 @@ class DoubleConvolution(nn.Module):
 
         Parameters
         ----------
-        x: torch.Tensor
+        x : torch.Tensor
             Input tensor to be processed by the double convolution
 
         Returns
         -------
-        torch.Tensor
+        result : torch.Tensor
             Output tensor after applying the double convolution
         """
 
@@ -82,17 +82,17 @@ class UNet(nn.Module):
 
     Attributes
     ----------
-    num_features: int
+    num_features : int
         Number of features in the encoder
-    ups: nn.ModuleList
+    ups : nn.ModuleList
         List of up-convolutions in the decoder
-    downs: nn.ModuleList
+    downs : nn.ModuleList
         List of double convolutions in the encoder
-    pool: nn.MaxPool2d
+    pool : nn.MaxPool2d
         Max pooling layer
-    bottleneck: DoubleConvolution
+    bottleneck : DoubleConvolution
         Bottleneck layer
-    final_conv: nn.Conv2d
+    final_conv : nn.Conv2d
         Final convolutional layer
 
     Methods
@@ -160,7 +160,7 @@ class UNet(nn.Module):
 
         Returns
         -------
-        bool
+        binary : bool
             True if the model output is binary, False if the model output is multi-class
         """
 
@@ -171,7 +171,7 @@ class UNet(nn.Module):
 
         Parameters
         ----------
-        x: torch.Tensor
+        x : torch.Tensor
             Input tensor to be processed by the UNet model of shape (batch_size, in_channels, height, width)
 
         Raises
@@ -181,7 +181,7 @@ class UNet(nn.Module):
 
         Returns
         -------
-        torch.Tensor
+        result : torch.Tensor
             Output tensor after applying the UNet model
         """
 

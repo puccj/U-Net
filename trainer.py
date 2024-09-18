@@ -138,7 +138,7 @@ class Trainer:
             If provided, directory where the input images, predictions, and masks will be saved.
         Returns
         -------
-        float
+        loss : float
             Average loss over the training set.
         """
 
@@ -190,11 +190,11 @@ class Trainer:
 
         Returns
         -------
-        float
+        loss : float
             Average loss over the validation set.
-        float
+        accuracy : float
             Accuracy of the model on the validation set (ratio of correct predictions to total pixels).
-        float
+        dice_score : float
             Average Dice score of the model on the validation set.
         """
 
@@ -318,13 +318,13 @@ class Trainer:
 
         Returns
         -------
-        list
+        train_loss : list
             List of training losses for each epoch.
-        list
+        val_loss : list
             List of validation losses for each epoch.
-        list
+        val_accuracy : list
             List of accuracies on the validation set for each epoch.
-        list
+        val_dice : list
             List of Dice scores on the validation set for each epoch.
         """
 

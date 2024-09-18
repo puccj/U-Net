@@ -8,6 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="canonical" href="https://puccj.github.io/U-Net/_modules/unet.html" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -84,7 +85,7 @@
 <span class="sd">    </span>
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    double_conv: nn.Sequential</span>
+<span class="sd">    double_conv : nn.Sequential</span>
 <span class="sd">        Sequence of two convolutional layers with batch normalization and ReLU activation function</span>
 
 <span class="sd">    Methods</span>
@@ -98,9 +99,9 @@
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        in_channels: int</span>
+<span class="sd">        in_channels : int</span>
 <span class="sd">            Number of input channels</span>
-<span class="sd">        out_channels: int</span>
+<span class="sd">        out_channels : int</span>
 <span class="sd">            Number of output channels</span>
 
 <span class="sd">        Raises</span>
@@ -132,12 +133,12 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        x: torch.Tensor</span>
+<span class="sd">        x : torch.Tensor</span>
 <span class="sd">            Input tensor to be processed by the double convolution</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        torch.Tensor</span>
+<span class="sd">        result : torch.Tensor</span>
 <span class="sd">            Output tensor after applying the double convolution</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -163,17 +164,17 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    num_features: int</span>
+<span class="sd">    num_features : int</span>
 <span class="sd">        Number of features in the encoder</span>
-<span class="sd">    ups: nn.ModuleList</span>
+<span class="sd">    ups : nn.ModuleList</span>
 <span class="sd">        List of up-convolutions in the decoder</span>
-<span class="sd">    downs: nn.ModuleList</span>
+<span class="sd">    downs : nn.ModuleList</span>
 <span class="sd">        List of double convolutions in the encoder</span>
-<span class="sd">    pool: nn.MaxPool2d</span>
+<span class="sd">    pool : nn.MaxPool2d</span>
 <span class="sd">        Max pooling layer</span>
-<span class="sd">    bottleneck: DoubleConvolution</span>
+<span class="sd">    bottleneck : DoubleConvolution</span>
 <span class="sd">        Bottleneck layer</span>
-<span class="sd">    final_conv: nn.Conv2d</span>
+<span class="sd">    final_conv : nn.Conv2d</span>
 <span class="sd">        Final convolutional layer</span>
 
 <span class="sd">    Methods</span>
@@ -243,7 +244,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        bool</span>
+<span class="sd">        binary : bool</span>
 <span class="sd">            True if the model output is binary, False if the model output is multi-class</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -257,7 +258,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        x: torch.Tensor</span>
+<span class="sd">        x : torch.Tensor</span>
 <span class="sd">            Input tensor to be processed by the UNet model of shape (batch_size, in_channels, height, width)</span>
 
 <span class="sd">        Raises</span>
@@ -267,7 +268,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        torch.Tensor</span>
+<span class="sd">        result : torch.Tensor</span>
 <span class="sd">            Output tensor after applying the UNet model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 

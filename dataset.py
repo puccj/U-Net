@@ -9,13 +9,13 @@ class SegmentationDataset(Dataset):
     
     Attributes
     ----------
-    image_dir: str
+    image_dir : str
         Path to the directory containing the images
-    mask_dir: str
+    mask_dir : str
         Path to the directory containing the masks
-    transform: Callable
+    transform : Callable
         Tranformation function to be applied to the images and masks in order to perform data augmentation.
-    images: List[str]
+    images : List[str]
         List of image file names
 
     Methods
@@ -31,11 +31,11 @@ class SegmentationDataset(Dataset):
 
         Parameters
         ----------
-        images_dir: str
+        images_dir : str
             Path to the directory containing the images
-        masks_dir: str
+        masks_dir : str
             Path to the directory containing the masks
-        transform: Callable
+        transform : Callable
             Tranformation function to be applied to the images and masks in order to perform data augmentation.
         """
         
@@ -45,9 +45,25 @@ class SegmentationDataset(Dataset):
         self.images = os.listdir(images_dir)
 
     def __len__(self):
+        """Return the length of the dataset"""
         return len(self.images)
     
     def __getitem__(self, idx):
+        """Return the image and mask at the given index
+
+        Parameters
+        ----------
+        idx : int
+            Index of the image and mask to return
+
+        Returns
+        -------
+        image : np.ndarray
+            Image as a numpy array
+        mask : np.ndarray
+            Mask as a numpy array
+        """
+
         image_path = os.path.join(self.image_dir, self.images[idx])
         mask_path = os.path.join(self.mask_dir, self.images[idx])
 

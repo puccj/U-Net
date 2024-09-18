@@ -325,10 +325,10 @@ If set to 0, only the best and last models are saved. If set to 1, the model is 
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><em>list</em> – List of training losses for each epoch.</p></li>
-<li><p><em>list</em> – List of validation losses for each epoch.</p></li>
-<li><p><em>list</em> – List of accuracies on the validation set for each epoch.</p></li>
-<li><p><em>list</em> – List of Dice scores on the validation set for each epoch.</p></li>
+<li><p><strong>train_loss</strong> (<em>list</em>) – List of training losses for each epoch.</p></li>
+<li><p><strong>val_loss</strong> (<em>list</em>) – List of validation losses for each epoch.</p></li>
+<li><p><strong>val_accuracy</strong> (<em>list</em>) – List of accuracies on the validation set for each epoch.</p></li>
+<li><p><strong>val_dice</strong> (<em>list</em>) – List of Dice scores on the validation set for each epoch.</p></li>
 </ul>
 </p>
 </dd>
@@ -345,7 +345,7 @@ Optionally saves images of the input, predictions, and masks during training.</p
 <dd class="field-odd"><p><strong>save_img_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, directory where the input images, predictions, and masks will be saved.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Average loss over the training set.</p>
+<dd class="field-even"><p><strong>loss</strong> – Average loss over the training set.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -364,9 +364,9 @@ Optionally saves images of the input, predictions, and masks during validation.<
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><em>float</em> – Average loss over the validation set.</p></li>
-<li><p><em>float</em> – Accuracy of the model on the validation set (ratio of correct predictions to total pixels).</p></li>
-<li><p><em>float</em> – Average Dice score of the model on the validation set.</p></li>
+<li><p><strong>loss</strong> (<em>float</em>) – Average loss over the validation set.</p></li>
+<li><p><strong>accuracy</strong> (<em>float</em>) – Accuracy of the model on the validation set (ratio of correct predictions to total pixels).</p></li>
+<li><p><strong>dice_score</strong> (<em>float</em>) – Average Dice score of the model on the validation set.</p></li>
 </ul>
 </p>
 </dd>

@@ -8,6 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="canonical" href="https://puccj.github.io/U-Net/_modules/dataset.html" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -84,13 +85,13 @@
 <span class="sd">    </span>
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    image_dir: str</span>
+<span class="sd">    image_dir : str</span>
 <span class="sd">        Path to the directory containing the images</span>
-<span class="sd">    mask_dir: str</span>
+<span class="sd">    mask_dir : str</span>
 <span class="sd">        Path to the directory containing the masks</span>
-<span class="sd">    transform: Callable</span>
+<span class="sd">    transform : Callable</span>
 <span class="sd">        Tranformation function to be applied to the images and masks in order to perform data augmentation.</span>
-<span class="sd">    images: List[str]</span>
+<span class="sd">    images : List[str]</span>
 <span class="sd">        List of image file names</span>
 
 <span class="sd">    Methods</span>
@@ -106,11 +107,11 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        images_dir: str</span>
+<span class="sd">        images_dir : str</span>
 <span class="sd">            Path to the directory containing the images</span>
-<span class="sd">        masks_dir: str</span>
+<span class="sd">        masks_dir : str</span>
 <span class="sd">            Path to the directory containing the masks</span>
-<span class="sd">        transform: Callable</span>
+<span class="sd">        transform : Callable</span>
 <span class="sd">            Tranformation function to be applied to the images and masks in order to perform data augmentation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
@@ -122,18 +123,35 @@
 <div class="viewcode-block" id="SegmentationDataset.__len__">
 <a class="viewcode-back" href="../dataset.html#dataset.SegmentationDataset.__len__">[docs]</a>
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the length of the dataset&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="SegmentationDataset.__getitem__">
 <a class="viewcode-back" href="../dataset.html#dataset.SegmentationDataset.__getitem__">[docs]</a>
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the image and mask at the given index</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Index of the image and mask to return</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        image : np.ndarray</span>
+<span class="sd">            Image as a numpy array</span>
+<span class="sd">        mask : np.ndarray</span>
+<span class="sd">            Mask as a numpy array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">image_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
         <span class="n">mask_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
 
         <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">))</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">mask_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>   <span class="c1"># so [0-255]</span>
-        <span class="n">mask</span><span class="p">[</span><span class="n">mask</span> <span class="o">==</span> <span class="mf">255.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>   <span class="c1"># Convert 255 to 1, indicating the probability of the pixel being the object</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">mask</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>  <span class="c1"># threshold the mask to get binary values (0 or 1)</span>
+        
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
             <span class="n">augmentations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">image</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>

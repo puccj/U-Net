@@ -53,7 +53,8 @@ class SegmentationDataset(Dataset):
 
         image = np.array(Image.open(image_path).convert("RGB"))
         mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)   # so [0-255]
-        mask[mask == 255.0] = 1.0   # Convert 255 to 1, indicating the probability of the pixel being the object
+        mask = (mask > 128).astype(np.float32)  # threshold the mask to get binary values (0 or 1)
+        
 
         if self.transform:
             augmentations = self.transform(image=image, mask=mask)

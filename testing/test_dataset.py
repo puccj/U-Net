@@ -1,29 +1,49 @@
+import numpy as np
 from dataset import SegmentationDataset
-from unittest.mock import patch
 
-# Test the SegmentationDataset class constructor (__init__ method)
 
-@patch('os.listdir')
-def test_images_loaded(mock_listdir):
-    # Check if images are loaded correctly
+# Test the SegmentationDataset class
 
-    # Simulate files in the directory
-    mock_listdir.side_effect = [['image1.png', 'image2.png']]
-    dataset = SegmentationDataset('path/to/images', 'path/to/masks')
-    assert dataset.images == ['image1.png', 'image2.png']
+def test_images_names_loaded():
+    """Check if images name are loaded correctly
 
-@patch('os.listdir')
-def test_masks_loaded(mock_listdir):
-    # Check if masks paths are set correctly
+    GIVEN: a test directory containing two images
+    WHEN: the SegmentationDataset class is initialized
+    THEN: the images attribute should contain the two images names
+    """
 
-    mock_listdir.side_effect = [['image1.png', 'image2.png']]
-    dataset = SegmentationDataset('path/to/images', 'path/to/masks')
-    assert dataset.mask_dir == 'path/to/masks'
+    dataset = SegmentationDataset('testing/test_data/test_red_dot/test_images', 'testing/test_data/test_red_dot/test_masks')
+    expected = ['3x3.png', '5x5.png']
 
-@patch('os.listdir')
-def test_empty_images(mock_listdir):
-    # Check if images are empty when the directory is empty
+    assert sorted(dataset.images) == sorted(expected)
 
-    mock_listdir.side_effect = [[]]
-    dataset = SegmentationDataset('path/to/images', 'path/to/masks', transform=None)
+def test_empty_images():
+    """Check if the dataset is empty when loading images from an empty directory
+    
+    GIVEN: a directory containing no images
+    WHEN: the SegmentationDataset class is initialized
+    THEN: the images attribute should be an empty list
+    """
+
+    dataset = SegmentationDataset('testing/test_data/empty_dir', 'testing/test_data/empty_dir', transform=None)
     assert dataset.images == []
+
+def test_images_data_loaded():
+    """Check if images data are loaded correctly
+    
+    GIVEN: a test directory containing two images with a red dot in the center
+    WHEN: the SegmentationDataset class is initialized and __getitem__() is called
+    THEN: the image data should be as expected
+    """
+
+    dataset = SegmentationDataset('testing/test_data/test_red_dot/test_images', 'testing/test_data/test_red_dot/test_masks')
+    image = dataset.__getitem__(0)[0]
+    mask = dataset.__getitem__(0)[1]
+
+    expected_image = np.zeros((5, 5, 3))
+    expected_image[2, 2, 0] = 255
+    expected_mask = np.zeros((5, 5))
+    expected_mask[2, 2] = 1
+
+    assert np.array_equal(image, expected_image)
+    assert np.array_equal(mask, expected_mask)

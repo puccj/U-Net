@@ -4,21 +4,6 @@ import torchvision
 from tqdm import tqdm
 
 
-def ensure_directory_exists(file_path):
-    """Ensures that the directory of the file path exists, and creates it if it doesn't.
-    
-    Parameters
-    ----------
-    file_path : str
-        Path to the file whose directory needs to be created if it doesn't exist.
-    """
-
-    directory = os.path.dirname(file_path)
-    if not directory:
-        return
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
 class Trainer:
     """Trainer class for training and validating a PyTorch model on a dataset.
 
@@ -169,13 +154,12 @@ class Trainer:
 
             # Save images
             if save_img_dir:
-                path_with_slash = os.path.join(save_img_dir, '')   # Ensure the path ends with a slash
-                ensure_directory_exists(path_with_slash)
+                os.makedirs(save_img_dir, exist_ok=True)
                 # Normalize the input image for visualization
                 x = (x - x.min()) / (x.max() - x.min())
-                torchvision.utils.save_image(x, f"{path_with_slash}img_{index}.png")
-                torchvision.utils.save_image(prediction, f"{path_with_slash}pred_{index}.png")
-                torchvision.utils.save_image(y, f"{path_with_slash}mask_{index}.png")
+                torchvision.utils.save_image(x, f"{save_img_dir}img_{index}.png")
+                torchvision.utils.save_image(prediction, f"{save_img_dir}pred_{index}.png")
+                torchvision.utils.save_image(y, f"{save_img_dir}mask_{index}.png")
 
         return total_loss / len(self.train_loader)
 
@@ -238,13 +222,12 @@ class Trainer:
 
                 # Save images
                 if save_img_dir:
-                    path_with_slash = os.path.join(save_img_dir, '')   # Ensure the path ends with a slash
-                    ensure_directory_exists(path_with_slash)
+                    os.makedirs(save_img_dir, exist_ok=True)
                     # Normalize the input image for visualization
                     x = (x - x.min()) / (x.max() - x.min())
-                    torchvision.utils.save_image(x, f"{path_with_slash}img_{index}.png")
-                    torchvision.utils.save_image(prediction, f"{path_with_slash}pred_{index}.png")
-                    torchvision.utils.save_image(y, f"{path_with_slash}mask_{index}.png")
+                    torchvision.utils.save_image(x, f"{save_img_dir}img_{index}.png")
+                    torchvision.utils.save_image(prediction, f"{save_img_dir}pred_{index}.png")
+                    torchvision.utils.save_image(y, f"{save_img_dir}mask_{index}.png")
 
         # Compute metrics
         loss = total_loss / len(self.val_loader)
@@ -262,7 +245,7 @@ class Trainer:
             Path to the checkpoint file. Default is 'checkpoints/last.pth'.
         """
 
-        ensure_directory_exists(file_path)
+        os.makedirs(file_path, exist_ok=True)
         checkpoint = {
             'model': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict()

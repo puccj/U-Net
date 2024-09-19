@@ -231,8 +231,7 @@ def test_train_step_save_image_not_called(mock_tqdm, mock_save_image):
 
 @patch("tqdm.tqdm", side_effect=lambda x, **kwargs: x)
 @patch("torchvision.utils.save_image")  # Mock save_image to avoid actual file saving
-@patch("trainer.ensure_directory_exists")       # Mock ensure_directory_exists to avoid creating directories
-def test_train_step_save_image_called(mock_tqdm, mock_save_image, mock_ensure_directory_exists):
+def test_train_step_save_image_called(mock_save_image, mock_tqdm):
     """Check that save_image is called when save_img_dir is provided
 
     GIVEN: a binary segmentation model
@@ -404,7 +403,7 @@ def test_val_step_scaler_called(mock_tqdm):
 
 @patch("tqdm.tqdm", side_effect=lambda x, **kwargs: x)
 @patch("torchvision.utils.save_image")  # Mock save_image to avoid actual file saving
-def test_val_step_save_image_not_called(mock_tqdm, mock_save_image):
+def test_val_step_save_image_not_called(mock_save_image, mock_tqdm):
     """Check that save_image is not called when save_img_dir is not provided
     
     GIVEN: a binary segmentation model
@@ -439,8 +438,7 @@ def test_val_step_save_image_not_called(mock_tqdm, mock_save_image):
 
 @patch("tqdm.tqdm", side_effect=lambda x, **kwargs: x)
 @patch("torchvision.utils.save_image")  # Mock save_image to avoid actual file saving
-@patch("trainer.ensure_directory_exists")       # Mock ensure_directory_exists to avoid creating directories
-def test_val_step_save_image_called(mock_tqdm, mock_save_image, mock_ensure_directory_exists):
+def test_val_step_save_image_called(mock_save_image, mock_tqdm):
     """Check that save_image is called when save_img_dir is provided
     
     GIVEN: a binary segmentation model
@@ -477,8 +475,7 @@ def test_val_step_save_image_called(mock_tqdm, mock_save_image, mock_ensure_dire
 # Test Trainer save_checkpoint method
 
 @patch("torch.save")
-@patch("trainer.ensure_directory_exists")
-def test_save_checkpoint_called(mock_save, mock_ensure_directory_exists):
+def test_save_checkpoint_called(mock_save):
     """Check that torch.save is called when save_checkpoint is called
 
     GIVEN: a binary segmentation model

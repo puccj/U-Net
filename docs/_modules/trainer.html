@@ -78,24 +78,6 @@
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 
-<div class="viewcode-block" id="ensure_directory_exists">
-<a class="viewcode-back" href="../trainer.html#trainer.ensure_directory_exists">[docs]</a>
-<span class="k">def</span> <span class="nf">ensure_directory_exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensures that the directory of the file path exists, and creates it if it doesn&#39;t.</span>
-<span class="sd">    </span>
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    file_path : str</span>
-<span class="sd">        Path to the file whose directory needs to be created if it doesn&#39;t exist.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">directory</span><span class="p">:</span>
-        <span class="k">return</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="Trainer">
 <a class="viewcode-back" href="../trainer.html#trainer.Trainer">[docs]</a>
 <span class="k">class</span> <span class="nc">Trainer</span><span class="p">:</span>
@@ -250,13 +232,12 @@
 
             <span class="c1"># Save images</span>
             <span class="k">if</span> <span class="n">save_img_dir</span><span class="p">:</span>
-                <span class="n">path_with_slash</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_img_dir</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>   <span class="c1"># Ensure the path ends with a slash</span>
-                <span class="n">ensure_directory_exists</span><span class="p">(</span><span class="n">path_with_slash</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_img_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="c1"># Normalize the input image for visualization</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-                <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_with_slash</span><span class="si">}</span><span class="s2">img_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
-                <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_with_slash</span><span class="si">}</span><span class="s2">pred_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
-                <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_with_slash</span><span class="si">}</span><span class="s2">mask_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+                <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_img_dir</span><span class="si">}</span><span class="s2">img_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+                <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_img_dir</span><span class="si">}</span><span class="s2">pred_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+                <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_img_dir</span><span class="si">}</span><span class="s2">mask_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_loader</span><span class="p">)</span></div>
 
@@ -322,13 +303,12 @@
 
                 <span class="c1"># Save images</span>
                 <span class="k">if</span> <span class="n">save_img_dir</span><span class="p">:</span>
-                    <span class="n">path_with_slash</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_img_dir</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>   <span class="c1"># Ensure the path ends with a slash</span>
-                    <span class="n">ensure_directory_exists</span><span class="p">(</span><span class="n">path_with_slash</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_img_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="c1"># Normalize the input image for visualization</span>
                     <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-                    <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_with_slash</span><span class="si">}</span><span class="s2">img_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
-                    <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_with_slash</span><span class="si">}</span><span class="s2">pred_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
-                    <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path_with_slash</span><span class="si">}</span><span class="s2">mask_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+                    <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_img_dir</span><span class="si">}</span><span class="s2">img_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+                    <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_img_dir</span><span class="si">}</span><span class="s2">pred_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+                    <span class="n">torchvision</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_img_dir</span><span class="si">}</span><span class="s2">mask_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
 
         <span class="c1"># Compute metrics</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val_loader</span><span class="p">)</span>
@@ -349,7 +329,7 @@
 <span class="sd">            Path to the checkpoint file. Default is &#39;checkpoints/last.pth&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">ensure_directory_exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
             <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>

@@ -113,6 +113,30 @@ class Trainer:
         self.scaler = torch.amp.GradScaler(self.device)
         self.model.to(self.device)
 
+    def __save_images(self, x, y, prediction, save_img_dir, index):
+        """Save images of the input, predictions, and masks during training or validation.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input image tensor.
+        y : torch.Tensor
+            Target mask tensor.
+        prediction : torch.Tensor
+            Predicted mask tensor.
+        save_img_dir : str
+            Directory where the images will be saved.
+        index : int
+            Index of the image in the dataset, used for naming the files.
+        """
+
+        os.makedirs(save_img_dir, exist_ok=True)
+        # Normalize the input image for visualization
+        x = (x - x.min()) / (x.max() - x.min())
+        torchvision.utils.save_image(x, f"{save_img_dir}img_{index}.png")
+        torchvision.utils.save_image(prediction, f"{save_img_dir}pred_{index}.png")
+        torchvision.utils.save_image(y, f"{save_img_dir}mask_{index}.png")
+
     def train_step(self, save_img_dir = None):
         """Performs a single training step (forward and backward pass for one epoch) on the training dataset.
         Optionally saves images of the input, predictions, and masks during training.
@@ -154,12 +178,7 @@ class Trainer:
 
             # Save images
             if save_img_dir:
-                os.makedirs(save_img_dir, exist_ok=True)
-                # Normalize the input image for visualization
-                x = (x - x.min()) / (x.max() - x.min())
-                torchvision.utils.save_image(x, f"{save_img_dir}img_{index}.png")
-                torchvision.utils.save_image(prediction, f"{save_img_dir}pred_{index}.png")
-                torchvision.utils.save_image(y, f"{save_img_dir}mask_{index}.png")
+                self.__save_images(x, y, prediction, save_img_dir, index)
 
         return total_loss / len(self.train_loader)
 
@@ -222,12 +241,8 @@ class Trainer:
 
                 # Save images
                 if save_img_dir:
-                    os.makedirs(save_img_dir, exist_ok=True)
-                    # Normalize the input image for visualization
-                    x = (x - x.min()) / (x.max() - x.min())
-                    torchvision.utils.save_image(x, f"{save_img_dir}img_{index}.png")
-                    torchvision.utils.save_image(prediction, f"{save_img_dir}pred_{index}.png")
-                    torchvision.utils.save_image(y, f"{save_img_dir}mask_{index}.png")
+                    self.__save_images(x, y, prediction, save_img_dir, index)
+
 
         # Compute metrics
         loss = total_loss / len(self.val_loader)

@@ -260,7 +260,7 @@ class Trainer:
             Path to the checkpoint file. Default is 'checkpoints/last.pth'.
         """
 
-        os.makedirs(file_path, exist_ok=True)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         checkpoint = {
             'model': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict()

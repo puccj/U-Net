@@ -475,7 +475,8 @@ def test_val_step_save_image_called(mock_save_image, mock_tqdm):
 # Test Trainer save_checkpoint method
 
 @patch("torch.save")
-def test_save_checkpoint_called(mock_save):
+@patch("os.makedirs")  # Mock makedirs to avoid creating directories
+def test_save_checkpoint_called(mock_makedirs, mock_save):
     """Check that torch.save is called when save_checkpoint is called
 
     GIVEN: a binary segmentation model
